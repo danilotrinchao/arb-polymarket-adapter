@@ -43,7 +43,7 @@ export class CatalogBuilderService {
             };
 
         const shapeResult = this.shapeClassifier.classify(market);
-        const semantic = this.semanticClassifier.classify(market, shapeResult.shape);
+        const semantic = this.semanticClassifier.classify(market); // ← corrigido
 
         const effectiveGameStartTime =
           market.gameStartTime ?? gammaDecision.matchedGammaStartTime;
