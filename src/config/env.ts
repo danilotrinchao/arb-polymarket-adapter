@@ -67,9 +67,9 @@ export const env = {
   enabledSportKeys: parseCsv(process.env.POLY_ENABLED_SPORT_KEYS),
 
   competitionSeriesIds:
-    parseCsv(process.env.POLY_COMPETITION_SERIES_IDS).length > 0
-      ? parseCsv(process.env.POLY_COMPETITION_SERIES_IDS)
-      : ["10359"],
+  parseCsv(process.env.POLY_COMPETITION_SERIES_IDS).length > 0
+    ? parseCsv(process.env.POLY_COMPETITION_SERIES_IDS)
+    : ["10359", "36", "10003", "10193", "10194", "10203", "10195"],
 
   redisEnabled: parseBooleanOrDefault(process.env.REDIS_ENABLED, true),
   redisUrl: process.env.REDIS_URL?.trim() ?? "redis://127.0.0.1:6379",
