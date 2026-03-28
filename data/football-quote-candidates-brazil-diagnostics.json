@@ -1,0 +1,198 @@
+{
+  "totalCandidates": 1168,
+  "builtEntries": 78,
+  "missingConditionId": 32,
+  "missingQuestion": 0,
+  "missingMarketSlug": 0,
+  "missingStartTime": 0,
+  "missingTokenIds": 0,
+  "unsupportedOutcomeShape": 312,
+  "unsupportedSemantic": 746,
+  "preservedStartTime": 0,
+  "correctedStartTime": 1136,
+  "inferredFromSlug": 1136,
+  "inferredFromQuestion": 0,
+  "defaultedTime": 0,
+  "examples": [
+    {
+      "conditionId": "0x5a4879b9fd5719e8529f3f1a0fac73b1dac28b6fe00a8fd6022466f0db969596",
+      "marketSlug": "bra-cap-bot-2026-03-11-draw",
+      "question": "Will CA Paranaense vs. Botafogo FR end in a draw?",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "reason": "UNSUPPORTED_SEMANTIC_DRAW_YES_NO",
+      "originalStartTime": "2026-02-12T20:05:42.694889Z",
+      "resolvedGameStartTime": "2026-03-11T20:05:42.694Z"
+    },
+    {
+      "conditionId": "0x064cf1d7024899bba5c9bd9ef221835c3b903ab5e208117e4866de91b0bc6d6e",
+      "marketSlug": "bra-cap-bot-2026-03-11-spread-home-1pt5",
+      "question": "Spread: CA Paranaense (-1.5)",
+      "outcomes": [
+        "CA Paranaense",
+        "Botafogo FR"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T13:40:12.363627Z",
+      "resolvedGameStartTime": "2026-03-11T13:40:12.363Z"
+    },
+    {
+      "conditionId": "0x8476e87dbfc9cc68699de271c2d05aa5dd27657ebe0a15daf7f8d33032609f39",
+      "marketSlug": "bra-cap-bot-2026-03-11-spread-away-1pt5",
+      "question": "Spread: Botafogo FR (-1.5)",
+      "outcomes": [
+        "Botafogo FR",
+        "CA Paranaense"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T13:45:18.199256Z",
+      "resolvedGameStartTime": "2026-03-11T13:45:18.199Z"
+    },
+    {
+      "conditionId": "0xa3067152bd93f9dd894d8cfdb858e26b578fc05005d1dcb45a902bf22a4403fd",
+      "marketSlug": "bra-cap-bot-2026-03-11-spread-home-2pt5",
+      "question": "Spread: CA Paranaense (-2.5)",
+      "outcomes": [
+        "CA Paranaense",
+        "Botafogo FR"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T13:43:41.433479Z",
+      "resolvedGameStartTime": "2026-03-11T13:43:41.433Z"
+    },
+    {
+      "conditionId": "0xab71fb243a5eda82e4868fe2de94f7a868b4933b404901cb0669a6361da329d3",
+      "marketSlug": "bra-cap-bot-2026-03-11-spread-away-2pt5",
+      "question": "Spread: Botafogo FR (-2.5)",
+      "outcomes": [
+        "Botafogo FR",
+        "CA Paranaense"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T13:33:01.312586Z",
+      "resolvedGameStartTime": "2026-03-11T13:33:01.312Z"
+    },
+    {
+      "conditionId": "0x4ec2f48702402a98855ab3225d8b9cafe566a3f6b83f170cb6e3f34ab67fbff8",
+      "marketSlug": "bra-cap-bot-2026-03-11-total-1pt5",
+      "question": "CA Paranaense vs. Botafogo FR: O/U 1.5",
+      "outcomes": [
+        "Over",
+        "Under"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T14:20:16.146264Z",
+      "resolvedGameStartTime": "2026-03-11T14:20:16.146Z"
+    },
+    {
+      "conditionId": "0x661e5aaed7fff5d7567f2c2c928e63180b85a39217f97f08f939ab11d046dee0",
+      "marketSlug": "bra-cap-bot-2026-03-11-total-2pt5",
+      "question": "CA Paranaense vs. Botafogo FR: O/U 2.5",
+      "outcomes": [
+        "Over",
+        "Under"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T14:06:08.259629Z",
+      "resolvedGameStartTime": "2026-03-11T14:06:08.259Z"
+    },
+    {
+      "conditionId": "0x2f7e5e44bd2acc276c1c1960de5efcc0a5595ffa6705c452b7781a60ccc885fb",
+      "marketSlug": "bra-cap-bot-2026-03-11-total-3pt5",
+      "question": "CA Paranaense vs. Botafogo FR: O/U 3.5",
+      "outcomes": [
+        "Over",
+        "Under"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T13:37:04.470926Z",
+      "resolvedGameStartTime": "2026-03-11T13:37:04.470Z"
+    },
+    {
+      "conditionId": "0x747d64eeec0978c8f3ad650363f09c45f211bf84f3292301191dbc609310b2a0",
+      "marketSlug": "bra-cap-bot-2026-03-11-total-4pt5",
+      "question": "CA Paranaense vs. Botafogo FR: O/U 4.5",
+      "outcomes": [
+        "Over",
+        "Under"
+      ],
+      "reason": "UNSUPPORTED_OUTCOME_SHAPE_NOT_YES_NO",
+      "originalStartTime": "2026-02-26T13:41:04.126892Z",
+      "resolvedGameStartTime": "2026-03-11T13:41:04.126Z"
+    },
+    {
+      "conditionId": "0x9618b6bf7c7842efb9f9e823015b090df1238e926b03e24e29c6fc8cb294dbe8",
+      "marketSlug": "bra-cap-bot-2026-03-11-btts",
+      "question": "CA Paranaense vs. Botafogo FR: Both Teams to Score",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "reason": "UNSUPPORTED_SEMANTIC_UNKNOWN_BINARY_PROPOSITION",
+      "originalStartTime": "2026-02-26T13:53:52.777125Z",
+      "resolvedGameStartTime": "2026-03-11T13:53:52.777Z"
+    },
+    {
+      "conditionId": "0x24b056fd78c2b50adb2ac5fc6082c1500698b78c327d2118058a4d0fa6ea0c56",
+      "marketSlug": "lal-ray-elc-2026-04-03-draw",
+      "question": "Will Rayo Vallecano de Madrid vs. Elche CF end in a draw?",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "reason": "UNSUPPORTED_SEMANTIC_DRAW_YES_NO",
+      "originalStartTime": "2026-03-25T06:04:17.524211Z",
+      "resolvedGameStartTime": "2026-04-03T06:04:17.524Z"
+    },
+    {
+      "conditionId": "0x4e11c6d736fe5866019af167596fb0d87125f4408bd6d082718e9837960c2b48",
+      "marketSlug": "lal-rso-lev-2026-04-04-draw",
+      "question": "Will Real Sociedad de Fútbol vs. Levante UD end in a draw?",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "reason": "UNSUPPORTED_SEMANTIC_DRAW_YES_NO",
+      "originalStartTime": "2026-03-25T06:05:11.853122Z",
+      "resolvedGameStartTime": "2026-04-04T06:05:11.853Z"
+    },
+    {
+      "conditionId": "0xe68ebeeacd518c4ba4cb68000cd0bfddba97b76d602d07bedb6c2279b72c5faf",
+      "marketSlug": "lal-mal-rea-2026-04-04-draw",
+      "question": "Will RCD Mallorca vs. Real Madrid CF end in a draw?",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "reason": "UNSUPPORTED_SEMANTIC_DRAW_YES_NO",
+      "originalStartTime": "2026-03-25T06:06:29.144341Z",
+      "resolvedGameStartTime": "2026-04-04T06:06:29.144Z"
+    },
+    {
+      "conditionId": "0x6a276ceaafff355125683a0125939ef1045b28ef19d408dc5666e7effb251e6c",
+      "marketSlug": "lal-bet-esp-2026-04-04-draw",
+      "question": "Will Real Betis Balompié vs. RCD Espanyol de Barcelona end in a draw?",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "reason": "UNSUPPORTED_SEMANTIC_DRAW_YES_NO",
+      "originalStartTime": "2026-03-25T06:05:32.832089Z",
+      "resolvedGameStartTime": "2026-04-04T06:05:32.832Z"
+    },
+    {
+      "conditionId": "0x672aa78007efa12511fdb0e1cbcec4f7adbda90b868bca1148ada09597c42c48",
+      "marketSlug": "lal-mad-bar-2026-04-04-draw",
+      "question": "Will Club Atlético de Madrid vs. FC Barcelona end in a draw?",
+      "outcomes": [
+        "Yes",
+        "No"
+      ],
+      "reason": "UNSUPPORTED_SEMANTIC_DRAW_YES_NO",
+      "originalStartTime": "2026-03-25T06:06:48.062104Z",
+      "resolvedGameStartTime": "2026-04-04T06:06:48.062Z"
+    }
+  ]
+}
