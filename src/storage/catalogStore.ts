@@ -58,6 +58,14 @@ export class CatalogStore {
     );
   }
 
+  public async saveNbaMatchCatalog(records: readonly unknown[]): Promise<void> {
+    await this.writeJson("nba-match-catalog.json", records);
+  }
+
+  public async saveNbaQuoteCandidates(records: readonly unknown[]): Promise<void> {
+    await this.writeJson("nba-quote-candidates.json", records);
+  }
+
   public async save(catalog: readonly unknown[]): Promise<void> {
     await this.saveCatalog(catalog);
   }

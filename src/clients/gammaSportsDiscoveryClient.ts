@@ -90,6 +90,46 @@ export class GammaSportsDiscoveryClient {
     return this.dedupeCandidates(candidates);
   }
 
+  public async fetchNbaCandidates(
+    seriesIds: readonly string[]
+  ): Promise<GammaDiscoveredCandidate[]> {
+    const normalizedSeriesIds = [...new Set(
+      seriesIds
+        .map((id) => id.trim())
+        .filter((id) => this.isValidSeriesId(id))
+    )];
+
+    if (normalizedSeriesIds.length === 0) {
+      console.log("[gamma] sport=nba Discovery skipped — no valid seriesIds configured");
+      return [];
+    }
+
+    console.log(
+      `[gamma] sport=nba Fetching candidates seriesIds=${normalizedSeriesIds.join(",")}`
+    );
+
+    const eventPages = await Promise.all(
+      normalizedSeriesIds.map(async (seriesId) => {
+        const events = await this.fetchEventsBySeries(seriesId);
+        return { seriesId, events };
+      })
+    );
+
+    const candidates = eventPages.flatMap(({ seriesId, events }) =>
+      events.flatMap((event) =>
+        this.toEventMarketCandidates(event, seriesId, null)
+      )
+    );
+
+    const result = this.dedupeCandidates(candidates);
+
+    console.log(
+      `[gamma] sport=nba Discovery complete candidates=${result.length}`
+    );
+
+    return result;
+  }
+
   private async fetchSports(): Promise<GammaSportResponse[]> {
     return this.fetchArrayOnce<GammaSportResponse>("/sports");
   }

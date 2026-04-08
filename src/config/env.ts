@@ -82,4 +82,17 @@ export const env = {
   redisFootballCatalogStreamKey:
     process.env.REDIS_FOOTBALL_CATALOG_STREAM_KEY?.trim() ??
     `${redisKeyPrefix}:events:catalog`,
+
+  // NBA — desligado por padrão, ligado via NBA_ENABLED=true + NBA_SERIES_IDS=<ids>
+  nbaEnabled: parseBooleanOrDefault(process.env.NBA_ENABLED, false),
+
+  nbaSeriesIds: parseCsv(process.env.NBA_SERIES_IDS),
+
+  redisNbaQuoteEligibleKey:
+    process.env.REDIS_NBA_QUOTE_ELIGIBLE_KEY?.trim() ??
+    `${redisKeyPrefix}:nba:quote-eligible:current`,
+
+  redisNbaCatalogStreamKey:
+    process.env.REDIS_NBA_CATALOG_STREAM_KEY?.trim() ??
+    `${redisKeyPrefix}:events:nba-catalog`,
 };

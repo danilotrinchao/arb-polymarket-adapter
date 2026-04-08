@@ -1,7 +1,8 @@
 export enum MarketShape {
   THREE_WAY_MATCH_RESULT = "THREE_WAY_MATCH_RESULT",
   BINARY_YES_NO = "BINARY_YES_NO",
+  HEAD_TO_HEAD_NAMED_OUTCOMES = "HEAD_TO_HEAD_NAMED_OUTCOMES",
   UNKNOWN = "UNKNOWN",
 }
 
-export type NormalizedOutcomeKey = "HOME" | "AWAY" | "DRAW";
+export type NormalizedOutcomeKey = "HOME" | "AWAY" | "DRAW" | "SIDE_A" | "SIDE_B";

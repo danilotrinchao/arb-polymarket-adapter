@@ -4,6 +4,7 @@ import { OutcomeNormalizer } from "./classification/outcomeNormalizer.js";
 import { MarketShapeClassifier } from "./classification/marketShapeClassifier.js";
 import { EligibilityService } from "./classification/eligibilityService.js";
 import { FootballMarketScope } from "./classification/footballMarketScope.js";
+import { NbaMarketScope } from "./classification/nbaMarketScope.js";
 import { GammaMarketMatcher } from "./classification/gammaMarketMatcher.js";
 import { SemanticClassifier } from "./classification/semanticClassifier.js";
 import { CatalogBuilderService } from "./catalog/catalogBuilderService.js";
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
   const shapeClassifier = new MarketShapeClassifier(outcomeNormalizer);
   const eligibilityService = new EligibilityService(outcomeNormalizer);
   const footballMarketScope = new FootballMarketScope();
+  const nbaMarketScope = new NbaMarketScope();
   const gammaMarketMatcher = new GammaMarketMatcher();
   const semanticClassifier = new SemanticClassifier(outcomeNormalizer);
   const competitionQuoteCandidateBuilder = new CompetitionQuoteCandidateBuilder(
@@ -33,7 +35,8 @@ async function main(): Promise<void> {
     eligibilityService,
     gammaMarketMatcher,
     footballMarketScope,
-    semanticClassifier
+    semanticClassifier,
+    nbaMarketScope
   );
 
   const store = new CatalogStore();
@@ -41,15 +44,19 @@ async function main(): Promise<void> {
   const redisPublisher = new CatalogRedisPublisher(redisClientFactory);
 
   try {
-    console.log("[bootstrap] Fetching sports candidates from Gamma...");
+    // ── Football ─────────────────────────────────────────────────────────────
+    console.log("[bootstrap] sport=football source=gamma Fetching sports candidates...");
     const gammaCandidates = await gammaClient.fetchSportsCandidates();
     console.log(
-      `[bootstrap] Retrieved ${gammaCandidates.length} Gamma sports candidates`
+      `[bootstrap] sport=football source=gamma candidates=${gammaCandidates.length}`
     );
 
-    console.log("[bootstrap] Fetching sampling markets from Polymarket CLOB...");
+    console.log("[bootstrap] sport=football source=clob Fetching sampling markets...");
     const clobMarkets = await clobClient.fetchAllSamplingMarkets();
-    console.log(`[bootstrap] Retrieved ${clobMarkets.length} raw CLOB markets`);
+    console.log(`[bootstrap] sport=football source=clob markets=${clobMarkets.length}`);
+
+    console.log("[debug] nbaEnabled=", env.nbaEnabled);
+    console.log("[debug] nbaSeriesIds=", env.nbaSeriesIds);
 
     const catalog = catalogBuilder.build(clobMarkets, gammaCandidates);
 
@@ -64,14 +71,7 @@ async function main(): Promise<void> {
       (x) => x.gameStartTime !== null
     ).length;
 
-    console.log(`[bootstrap] Built catalog entries: ${catalog.length}`);
-    console.log(`[bootstrap] Sports plausible: ${sportsPlausible}`);
-    console.log(`[bootstrap] Quote eligible: ${quoteEligible}`);
-    console.log(`[bootstrap] Trade eligible: ${tradeEligible}`);
-    console.log(`[bootstrap] Rejected for quote: ${rejectedForQuote}`);
-    console.log(
-      `[bootstrap] Game start time recovered from Gamma: ${recoveredGameStartTime}`
-    );
+    console.log(`[bootstrap] sport=football catalog=${catalog.length} sportsPlausible=${sportsPlausible} quoteEligible=${quoteEligible} tradeEligible=${tradeEligible} rejected=${rejectedForQuote} startTimeRecovered=${recoveredGameStartTime}`);
 
     const quoteSummary = new Map<string, number>();
     for (const entry of catalog) {
@@ -81,7 +81,7 @@ async function main(): Promise<void> {
       );
     }
 
-    console.log("[bootstrap] Quote eligibility summary:");
+    console.log("[bootstrap] sport=football Quote eligibility summary:");
     for (const [reason, count] of quoteSummary.entries()) {
       console.log(`  - ${reason}: ${count}`);
     }
@@ -94,7 +94,7 @@ async function main(): Promise<void> {
       );
     }
 
-    console.log("[bootstrap] Trade eligibility summary:");
+    console.log("[bootstrap] sport=football Trade eligibility summary:");
     for (const [reason, count] of tradeSummary.entries()) {
       console.log(`  - ${reason}: ${count}`);
     }
@@ -107,7 +107,7 @@ async function main(): Promise<void> {
       );
     }
 
-    console.log("[bootstrap] Sports plausibility summary:");
+    console.log("[bootstrap] sport=football Sports plausibility summary:");
     for (const [reason, count] of sportsSummary.entries()) {
       console.log(`  - ${reason}: ${count}`);
     }
@@ -120,7 +120,7 @@ async function main(): Promise<void> {
       );
     }
 
-    console.log("[bootstrap] Semantic summary:");
+    console.log("[bootstrap] sport=football Semantic summary:");
     for (const [reason, count] of semanticSummary.entries()) {
       console.log(`  - ${reason}: ${count}`);
     }
@@ -130,15 +130,12 @@ async function main(): Promise<void> {
     await store.saveFootballQuoteCandidates(quoteEligibleCatalog);
 
     console.log(
-      `[bootstrap] Saved football match catalog: ${footballMatchCatalog.length}`
-    );
-    console.log(
-      `[bootstrap] Saved football quote candidates: ${quoteEligibleCatalog.length}`
+      `[bootstrap] sport=football Saved matchCatalog=${footballMatchCatalog.length} quoteCandidates=${quoteEligibleCatalog.length}`
     );
 
     const competitionSeriesIds = env.competitionSeriesIds;
     console.log(
-      `[bootstrap] Fetching competition-scoped Gamma candidates for series_ids: ${competitionSeriesIds.join(",")}`
+      `[bootstrap] sport=football source=gamma Fetching competition candidates seriesIds=${competitionSeriesIds.join(",")}`
     );
 
     const competitionCandidates =
@@ -147,7 +144,7 @@ async function main(): Promise<void> {
       );
 
     console.log(
-      `[bootstrap] Retrieved ${competitionCandidates.length} competition-scoped Gamma candidates`
+      `[bootstrap] sport=football source=gamma competitionCandidates=${competitionCandidates.length}`
     );
 
     const brazilBuild = competitionQuoteCandidateBuilder.build(
@@ -160,15 +157,15 @@ async function main(): Promise<void> {
     );
 
     console.log(
-      `[bootstrap] Saved football Brazil quote candidates: ${brazilBuild.entries.length}`
+      `[bootstrap] sport=football league=brazil-serie-a quoteCandidates=${brazilBuild.entries.length}`
     );
     console.log(
-      `[bootstrap] Brazil diagnostics -> total=${brazilBuild.diagnostics.totalCandidates} built=${brazilBuild.diagnostics.builtEntries} missingConditionId=${brazilBuild.diagnostics.missingConditionId} missingQuestion=${brazilBuild.diagnostics.missingQuestion} missingMarketSlug=${brazilBuild.diagnostics.missingMarketSlug} missingStartTime=${brazilBuild.diagnostics.missingStartTime} missingTokenIds=${brazilBuild.diagnostics.missingTokenIds} unsupportedOutcomeShape=${brazilBuild.diagnostics.unsupportedOutcomeShape} unsupportedSemantic=${brazilBuild.diagnostics.unsupportedSemantic} preservedStartTime=${brazilBuild.diagnostics.preservedStartTime} correctedStartTime=${brazilBuild.diagnostics.correctedStartTime} inferredFromSlug=${brazilBuild.diagnostics.inferredFromSlug} inferredFromQuestion=${brazilBuild.diagnostics.inferredFromQuestion} defaultedTime=${brazilBuild.diagnostics.defaultedTime}`
+      `[bootstrap] sport=football league=brazil-serie-a diagnostics -> total=${brazilBuild.diagnostics.totalCandidates} built=${brazilBuild.diagnostics.builtEntries} missingConditionId=${brazilBuild.diagnostics.missingConditionId} missingQuestion=${brazilBuild.diagnostics.missingQuestion} missingMarketSlug=${brazilBuild.diagnostics.missingMarketSlug} missingStartTime=${brazilBuild.diagnostics.missingStartTime} missingTokenIds=${brazilBuild.diagnostics.missingTokenIds} unsupportedOutcomeShape=${brazilBuild.diagnostics.unsupportedOutcomeShape} unsupportedSemantic=${brazilBuild.diagnostics.unsupportedSemantic} preservedStartTime=${brazilBuild.diagnostics.preservedStartTime} correctedStartTime=${brazilBuild.diagnostics.correctedStartTime} inferredFromSlug=${brazilBuild.diagnostics.inferredFromSlug} inferredFromQuestion=${brazilBuild.diagnostics.inferredFromQuestion} defaultedTime=${brazilBuild.diagnostics.defaultedTime}`
     );
 
     for (const example of brazilBuild.diagnostics.examples.slice(0, 10)) {
       console.log(
-        `[bootstrap] Brazil unsupported example -> reason=${example.reason} conditionId=${example.conditionId ?? "null"} slug=${example.marketSlug ?? "null"} question=${example.question ?? "null"} originalStartTime=${example.originalStartTime ?? "null"} resolvedGameStartTime=${example.resolvedGameStartTime ?? "null"} outcomes=${JSON.stringify(example.outcomes)}`
+        `[bootstrap] sport=football league=brazil-serie-a unsupported -> reason=${example.reason} conditionId=${example.conditionId ?? "null"} slug=${example.marketSlug ?? "null"} question=${example.question ?? "null"} originalStartTime=${example.originalStartTime ?? "null"} resolvedGameStartTime=${example.resolvedGameStartTime ?? "null"} outcomes=${JSON.stringify(example.outcomes)}`
       );
     }
 
@@ -189,8 +186,73 @@ async function main(): Promise<void> {
     });
 
     console.log(
-      `[bootstrap] Published Redis quote snapshot: ${redisPayload.length} scope=${redisScope} competitionSeriesIds=${competitionSeriesIds.join(",")}`
+      `[bootstrap] sport=football Published Redis snapshot count=${redisPayload.length} scope=${redisScope} stream=${env.redisFootballCatalogStreamKey}`
     );
+
+    // ── NBA ───────────────────────────────────────────────────────────────────
+    if (env.nbaEnabled) {
+      if (env.nbaSeriesIds.length === 0) {
+        console.log(
+          "[bootstrap] sport=nba NBA_ENABLED=true but NBA_SERIES_IDS is empty — skipping"
+        );
+      } else {
+        const nbaCandidates = await gammaClient.fetchNbaCandidates(env.nbaSeriesIds);
+
+        const nbaCatalog = catalogBuilder.buildNba(clobMarkets, nbaCandidates);
+
+        const nbaSportsPlausible = nbaCatalog.filter((x) => x.sportsPlausible).length;
+        const nbaQuoteEligibleCatalog = nbaCatalog.filter((x) => x.quoteEligible);
+        const nbaMatchCatalog = nbaCatalog.filter((x) => x.sportsPlausible);
+        const nbaQuoteEligible = nbaQuoteEligibleCatalog.length;
+        const nbaTradeEligible = nbaCatalog.filter((x) => x.tradeEligible).length;
+
+        console.log(
+          `[bootstrap] sport=nba catalog=${nbaCatalog.length} sportsPlausible=${nbaSportsPlausible} quoteEligible=${nbaQuoteEligible} tradeEligible=${nbaTradeEligible}`
+        );
+
+        const nbaQuoteSummary = new Map<string, number>();
+        for (const entry of nbaCatalog) {
+          nbaQuoteSummary.set(
+            entry.reasonCode,
+            (nbaQuoteSummary.get(entry.reasonCode) ?? 0) + 1
+          );
+        }
+
+        console.log("[bootstrap] sport=nba Quote eligibility summary:");
+        for (const [reason, count] of nbaQuoteSummary.entries()) {
+          console.log(`  - ${reason}: ${count}`);
+        }
+
+        await store.saveNbaMatchCatalog(nbaMatchCatalog);
+        await store.saveNbaQuoteCandidates(nbaQuoteEligibleCatalog);
+
+        console.log(
+          `[bootstrap] sport=nba Saved matchCatalog=${nbaMatchCatalog.length} quoteCandidates=${nbaQuoteEligibleCatalog.length}`
+        );
+
+        const nbaGeneratedAt = new Date().toISOString();
+
+        await redisPublisher.publishSnapshot(nbaQuoteEligibleCatalog, {
+          generatedAt: nbaGeneratedAt,
+          totalCatalog: nbaCatalog.length,
+          sportsPlausible: nbaSportsPlausible,
+          quoteEligible: nbaQuoteEligible,
+          tradeEligible: nbaTradeEligible,
+        }, {
+          sport: "nba",
+          league: "nba",
+          snapshotType: "NBA_QUOTE_ELIGIBLE",
+          snapshotKey: env.redisNbaQuoteEligibleKey,
+          streamKey: env.redisNbaCatalogStreamKey,
+          streamEventType: "nba.catalog.updated",
+        });
+
+        console.log(
+          `[bootstrap] sport=nba Published Redis snapshot count=${nbaQuoteEligibleCatalog.length} stream=${env.redisNbaCatalogStreamKey}`
+        );
+      }
+    }
+
     console.log("[bootstrap] Catalog saved successfully");
   } finally {
     await redisPublisher.disconnect();

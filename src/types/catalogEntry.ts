@@ -6,14 +6,15 @@ import {
 } from "./semanticMarket.js";
 
 export type GameStartTimeSource = "CLOB" | "GAMMA" | null;
+export type OutcomeRole = "YES" | "NO" | "SIDE_A" | "SIDE_B";
 export type BinaryOutcomeRole = "YES" | "NO";
-export type SupportedNormalizedOutcomeKey = NormalizedOutcomeKey | "YES" | "NO";
+export type SupportedNormalizedOutcomeKey = NormalizedOutcomeKey | "YES" | "NO" | "SIDE_A" | "SIDE_B";
 
 export interface CatalogOutcomeEntry {
   tokenId: string;
   outcomeLabel: string;
   normalizedOutcomeKey: SupportedNormalizedOutcomeKey | null;
-  binaryOutcomeRole: BinaryOutcomeRole | null;
+  binaryOutcomeRole: OutcomeRole | null;
   price: number | null;
   winner: boolean | null;
 }
@@ -24,6 +25,8 @@ export interface CatalogEntry {
   conditionId: string;
   question: string;
   marketSlug: string | null;
+
+  sportKey?: string | null;
 
   rawGameStartTime: string | null;
   gameStartTime: string | null;

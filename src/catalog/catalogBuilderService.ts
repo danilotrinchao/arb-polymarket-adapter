@@ -6,9 +6,10 @@ import {
 import { CatalogEntry, GameStartTimeSource } from "../types/catalogEntry.js";
 import { GammaDiscoveredCandidate } from "../types/gammaDiscovery.js";
 import { MarketShapeClassifier } from "../classification/marketShapeClassifier.js";
-import { EligibilityService } from "../classification/eligibilityService.js";
+import { EligibilityService, SportsMatchScopeDecision } from "../classification/eligibilityService.js";
 import { GammaMarketMatcher } from "../classification/gammaMarketMatcher.js";
 import { FootballMarketScope } from "../classification/footballMarketScope.js";
+import { NbaMarketScope } from "../classification/nbaMarketScope.js";
 import { SemanticMarketClassifier } from "../classification/semanticMarketClassifier.js";
 
 export class CatalogBuilderService {
@@ -17,7 +18,8 @@ export class CatalogBuilderService {
     private readonly eligibilityService: EligibilityService,
     private readonly gammaMarketMatcher: GammaMarketMatcher,
     private readonly footballMarketScope: FootballMarketScope,
-    private readonly semanticClassifier: SemanticMarketClassifier
+    private readonly semanticClassifier: SemanticMarketClassifier,
+    private readonly nbaMarketScope: NbaMarketScope
   ) {}
 
   public build(
@@ -69,6 +71,7 @@ export class CatalogBuilderService {
           conditionId: market.conditionId,
           question: market.question,
           marketSlug: market.marketSlug,
+          sportKey: footballScopeDecision.isFootballMatchMarket ? "football" : null,
 
           rawGameStartTime: market.gameStartTime,
           gameStartTime: effectiveGameStartTime,
@@ -99,6 +102,104 @@ export class CatalogBuilderService {
           sportsPlausible: footballScopeDecision.isFootballMatchMarket,
           sportsReasonCode: footballScopeDecision.reasonCode,
           sportsReasonDetail: footballScopeDecision.reasonDetail,
+          matchedGammaSource: gammaDecision.matchedGammaSource,
+          matchedGammaId: gammaDecision.matchedGammaId,
+          matchedGammaStartTime: gammaDecision.matchedGammaStartTime,
+
+          outcomes: decision.normalizedOutcomes,
+          discoveredAt: now,
+          lastSeenAt: now,
+        } satisfies CatalogEntry;
+      });
+  }
+
+  public buildNba(
+    markets: PolymarketSamplingMarketResponse[],
+    gammaCandidates: GammaDiscoveredCandidate[]
+  ): CatalogEntry[] {
+    const now = new Date().toISOString();
+    const gammaIndex = this.gammaMarketMatcher.buildIndex(gammaCandidates);
+
+    return markets
+      .map((raw) => this.toDiscoveredMarket(raw))
+      .filter((x): x is DiscoveredMarket => x !== null)
+      .map((market) => {
+        const gammaDecision = this.gammaMarketMatcher.evaluate(market, gammaIndex);
+
+        const nbaScopeDecision = gammaDecision.matchedCandidate
+          ? this.nbaMarketScope.evaluateCandidate(gammaDecision.matchedCandidate)
+          : {
+              isNbaMatchMarket: false,
+              isFutureMarket: false,
+              reasonCode: "NO_GAMMA_NBA_GAME",
+              reasonDetail: "No matched Gamma NBA game candidate to evaluate scope",
+            };
+
+        const scopeForEligibility: SportsMatchScopeDecision = {
+          isInScope: nbaScopeDecision.isNbaMatchMarket,
+          isFutureMarket: nbaScopeDecision.isFutureMarket,
+          reasonCode: nbaScopeDecision.reasonCode,
+          reasonDetail: nbaScopeDecision.reasonDetail,
+        };
+
+        const shapeResult = this.shapeClassifier.classify(market);
+        const semantic = this.semanticClassifier.classify(market);
+
+        const effectiveGameStartTime =
+          market.gameStartTime ?? gammaDecision.matchedGammaStartTime;
+
+        const gameStartTimeSource: GameStartTimeSource = market.gameStartTime
+          ? "CLOB"
+          : gammaDecision.matchedGammaStartTime
+          ? "GAMMA"
+          : null;
+
+        const decision = this.eligibilityService.decideForScope(
+          market,
+          scopeForEligibility,
+          shapeResult.shape,
+          semantic,
+          effectiveGameStartTime,
+          gameStartTimeSource
+        );
+
+        return {
+          catalogId: market.conditionId,
+          source: "polymarket",
+          conditionId: market.conditionId,
+          question: market.question,
+          marketSlug: market.marketSlug,
+          sportKey: "nba",
+
+          rawGameStartTime: market.gameStartTime,
+          gameStartTime: effectiveGameStartTime,
+          gameStartTimeSource,
+
+          shape: shapeResult.shape,
+
+          semanticType: semantic.semanticType,
+          semanticSupported: semantic.isSemanticallySupported,
+          semanticReasonCode: semantic.semanticReasonCode,
+          semanticReasonDetail: semantic.semanticReasonDetail,
+          referencedTeam: semantic.referencedTeam,
+          yesSemanticMode: semantic.yesSemanticMode,
+          noSemanticMode: semantic.noSemanticMode,
+
+          quoteEligible: decision.quoteEligible,
+          quoteReasonCode: decision.quoteReasonCode,
+          quoteReasonDetail: decision.quoteReasonDetail,
+
+          tradeEligible: decision.tradeEligible,
+          tradeReasonCode: decision.tradeReasonCode,
+          tradeReasonDetail: decision.tradeReasonDetail,
+
+          isEligible: decision.quoteEligible,
+          reasonCode: decision.quoteReasonCode,
+          reasonDetail: decision.quoteReasonDetail,
+
+          sportsPlausible: nbaScopeDecision.isNbaMatchMarket,
+          sportsReasonCode: nbaScopeDecision.reasonCode,
+          sportsReasonDetail: nbaScopeDecision.reasonDetail,
           matchedGammaSource: gammaDecision.matchedGammaSource,
           matchedGammaId: gammaDecision.matchedGammaId,
           matchedGammaStartTime: gammaDecision.matchedGammaStartTime,
