@@ -16,6 +16,15 @@ export class MarketShapeClassifier {
       return { shape: MarketShape.BINARY_YES_NO };
     }
 
+    if (market.tokens.length === 2) {
+      const nonEmpty = outcomes.every((o) => typeof o === "string" && o.trim().length > 0);
+      const distinct = outcomes[0]?.trim() !== outcomes[1]?.trim();
+
+      if (nonEmpty && distinct) {
+        return { shape: MarketShape.HEAD_TO_HEAD_NAMED_OUTCOMES };
+      }
+    }
+
     if (market.tokens.length === 3) {
       return { shape: MarketShape.THREE_WAY_MATCH_RESULT };
     }

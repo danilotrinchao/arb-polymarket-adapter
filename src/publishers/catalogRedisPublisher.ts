@@ -7,9 +7,19 @@ import {
   RedisQuoteEligibleMarket,
 } from "../types/redisCatalog.js";
 
+export interface SportPublishContext {
+  sport: string;
+  league: string;
+  snapshotType: string;
+  snapshotKey: string;
+  streamKey: string;
+  streamEventType: string;
+}
+
 export class CatalogRedisPublisher {
   constructor(private readonly redisClientFactory: RedisClientFactory) {}
 
+  // Mantido para compatibilidade com o fluxo atual de futebol
   public async publishQuoteEligibleSnapshot(
     entries: readonly CatalogEntry[],
     summary: CatalogPublishSummary
@@ -47,10 +57,56 @@ export class CatalogRedisPublisher {
     });
 
     console.log(
-      `[redis] Snapshot saved key=${env.redisFootballQuoteEligibleKey} count=${payload.markets.length}`
+      `[redis] sport=football Snapshot saved key=${env.redisFootballQuoteEligibleKey} count=${payload.markets.length}`
     );
     console.log(
-      `[redis] Stream event appended stream=${env.redisFootballCatalogStreamKey}`
+      `[redis] sport=football Stream event appended stream=${env.redisFootballCatalogStreamKey}`
+    );
+  }
+
+  public async publishSnapshot(
+    entries: readonly CatalogEntry[],
+    summary: CatalogPublishSummary,
+    ctx: SportPublishContext
+  ): Promise<void> {
+    if (!env.redisEnabled) {
+      console.log(
+        `[redis] Publishing skipped because REDIS_ENABLED=false sport=${ctx.sport} league=${ctx.league}`
+      );
+      return;
+    }
+
+    const client = await this.redisClientFactory.getClient();
+
+    const payload = {
+      snapshotType: ctx.snapshotType,
+      version: summary.generatedAt,
+      generatedAt: summary.generatedAt,
+      summary,
+      markets: entries.map((entry) => this.mapEntry(entry)),
+    };
+
+    await client.set(ctx.snapshotKey, JSON.stringify(payload));
+
+    await client.xAdd(ctx.streamKey, "*", {
+      eventType: ctx.streamEventType,
+      sport: ctx.sport,
+      league: ctx.league,
+      version: payload.version,
+      generatedAt: payload.generatedAt,
+      totalCatalog: String(summary.totalCatalog),
+      sportsPlausible: String(summary.sportsPlausible),
+      quoteEligible: String(summary.quoteEligible),
+      tradeEligible: String(summary.tradeEligible),
+      snapshotKey: ctx.snapshotKey,
+      snapshotCount: String(payload.markets.length),
+    });
+
+    console.log(
+      `[redis] sport=${ctx.sport} league=${ctx.league} Snapshot saved key=${ctx.snapshotKey} count=${payload.markets.length}`
+    );
+    console.log(
+      `[redis] sport=${ctx.sport} Stream event appended stream=${ctx.streamKey} eventType=${ctx.streamEventType}`
     );
   }
 

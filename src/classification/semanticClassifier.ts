@@ -9,12 +9,68 @@ export class SemanticClassifier implements SemanticMarketClassifier {
   }
 
   public classify(market: DiscoveredMarket): SemanticInterpretation {
+    const headToHead = this.classifyHeadToHeadWinner(market);
+    if (headToHead) {
+      return headToHead;
+    }
+
     const rawText = `${market.question} ${market.marketSlug ?? ""}`;
     return this.classifyText(rawText);
   }
 
   public classifyBinarySportsProposition(question: string): SemanticInterpretation {
     return this.classifyText(question);
+  }
+
+  private classifyHeadToHeadWinner(market: DiscoveredMarket): SemanticInterpretation | null {
+    const text = market.question.trim();
+    const vsPattern = /^(.+?)\s+vs\.?\s+(.+?)$/i;
+    const vsMatch = text.match(vsPattern);
+    if (!vsMatch) {
+      return null;
+    }
+
+    const left = this.normalizeText(vsMatch[1] as string);
+    const right = this.normalizeText(vsMatch[2] as string);
+
+    if (!left || !right || left === right) {
+      return null;
+    }
+
+    if (market.tokens.length !== 2) {
+      return null;
+    }
+
+    const normalizedOutcomes = market.tokens.map((t) => this.normalizeText(t.outcomeLabel));
+    if (normalizedOutcomes.some((o) => !o)) {
+      return null;
+    }
+
+    const [outcomeA, outcomeB] = normalizedOutcomes as [string, string];
+    if (outcomeA === outcomeB) {
+      return null;
+    }
+
+    const players = [left, right];
+
+    if (
+      (outcomeA === left && outcomeB === right) ||
+      (outcomeA === right && outcomeB === left)
+    ) {
+      return {
+        semanticType: "TEAM_VS_TEAM_WINNER",
+        semanticReasonCode: "TEAM_VS_TEAM_WINNER_DETECTED",
+        semanticReasonDetail:
+          "Detected a head-to-head two-team winner market with named outcomes",
+        isSemanticallySupported: true,
+        yesSemanticMode: null,
+        noSemanticMode: null,
+        canonicalSelectionHint: null,
+        referencedTeam: null,
+      };
+    }
+
+    return null;
   }
 
   public looksLikeDrawProposition(text: string): boolean {

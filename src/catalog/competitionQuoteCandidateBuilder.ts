@@ -151,7 +151,7 @@ export class CompetitionQuoteCandidateBuilder {
 
       const semantic = this.semanticClassifier.classifyBinarySportsProposition(question);
 
-      if (semantic.semanticType !== "TEAM_TO_WIN_YES_NO") {
+      if (semantic.semanticType !== "TEAM_TO_WIN_YES_NO" && semantic.semanticType !== "DRAW_YES_NO") {
         diagnostics.unsupportedSemantic++;
         this.pushExample(
           diagnostics,

@@ -47,3 +47,11 @@ export interface FootballQuoteEligibleSnapshot {
   summary: CatalogPublishSummary;
   markets: RedisQuoteEligibleMarket[];
 }
+
+export interface NbaQuoteEligibleSnapshot {
+  snapshotType: "NBA_QUOTE_ELIGIBLE";
+  version: string;
+  generatedAt: string;
+  summary: CatalogPublishSummary;
+  markets: RedisQuoteEligibleMarket[];
+}

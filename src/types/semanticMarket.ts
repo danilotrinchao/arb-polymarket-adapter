@@ -3,9 +3,11 @@ import { DiscoveredMarket } from "./discoveredMarket.js";
 export type SemanticMarketType =
   | "TEAM_TO_WIN_YES_NO"
   | "DRAW_YES_NO"
+  | "TEAM_VS_TEAM_WINNER"
   | "UNKNOWN_BINARY_PROPOSITION"
   | "UNSUPPORTED_SHAPE";
 
+export type OutcomeRole = "YES" | "NO" | "SIDE_A" | "SIDE_B";
 export type BinaryOutcomeRole = "YES" | "NO";
 
 export type YesSemanticMode =
@@ -21,7 +23,9 @@ export type NormalizedOutcomeKey =
   | "NO"
   | "DRAW"
   | "HOME"
-  | "AWAY";
+  | "AWAY"
+  | "SIDE_A"
+  | "SIDE_B";
 
 export interface SemanticInterpretation {
   semanticType: SemanticMarketType;
