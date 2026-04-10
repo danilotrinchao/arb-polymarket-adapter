@@ -84,7 +84,7 @@ export const env = {
     `${redisKeyPrefix}:events:catalog`,
 
   // NBA — desligado por padrão, ligado via NBA_ENABLED=true + NBA_SERIES_IDS=<ids>
-  nbaEnabled: parseBooleanOrDefault(process.env.NBA_ENABLED, false),
+  nbaEnabled: parseBooleanOrDefault(process.env.NBA_ENABLED, true),
 
   nbaSeriesIds: parseCsv(process.env.NBA_SERIES_IDS),
 
