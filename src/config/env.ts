@@ -47,6 +47,11 @@ const rawNbaSeriesIds = process.env.NBA_SERIES_IDS;
 const nbaEnabled = parseBooleanOrDefault(rawNbaEnabled, false);
 const nbaSeriesIds = parseCsv(rawNbaSeriesIds);
 
+console.log("[env] NBA_ENABLED(raw)=", rawNbaEnabled ?? "undefined");
+console.log("[env] NBA_SERIES_IDS(raw)=", rawNbaSeriesIds ?? "undefined");
+console.log("[env] nbaEnabled(parsed)=", nbaEnabled);
+console.log("[env] nbaSeriesIds(parsed)=", nbaSeriesIds);
+
 if (nbaEnabled && nbaSeriesIds.length === 0) {
   console.warn(
     "[env] NBA is enabled but NBA_SERIES_IDS is empty or missing. " +
