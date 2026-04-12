@@ -41,6 +41,20 @@ const redisKeyPrefix =
     ? process.env.REDIS_KEY_PREFIX.trim()
     : "pm";
 
+const rawNbaEnabled = process.env.NBA_ENABLED;
+const rawNbaSeriesIds = process.env.NBA_SERIES_IDS;
+
+const nbaEnabled = parseBooleanOrDefault(rawNbaEnabled, false);
+const nbaSeriesIds = parseCsv(rawNbaSeriesIds);
+
+if (nbaEnabled && nbaSeriesIds.length === 0) {
+  console.warn(
+    "[env] NBA is enabled but NBA_SERIES_IDS is empty or missing. " +
+      `NBA_ENABLED=${rawNbaEnabled ?? "undefined"} ` +
+      `NBA_SERIES_IDS=${rawNbaSeriesIds ?? "undefined"}`
+  );
+}
+
 export const env = {
   polymarketGammaBaseUrl:
     process.env.POLYMARKET_GAMMA_BASE_URL?.trim() ??
@@ -67,9 +81,9 @@ export const env = {
   enabledSportKeys: parseCsv(process.env.POLY_ENABLED_SPORT_KEYS),
 
   competitionSeriesIds:
-  parseCsv(process.env.POLY_COMPETITION_SERIES_IDS).length > 0
-    ? parseCsv(process.env.POLY_COMPETITION_SERIES_IDS)
-    : ["10359", "36", "10003", "10193", "10194", "10203", "10195"],
+    parseCsv(process.env.POLY_COMPETITION_SERIES_IDS).length > 0
+      ? parseCsv(process.env.POLY_COMPETITION_SERIES_IDS)
+      : ["10359", "36", "10003", "10193", "10194", "10203", "10195"],
 
   redisEnabled: parseBooleanOrDefault(process.env.REDIS_ENABLED, true),
   redisUrl: process.env.REDIS_URL?.trim() ?? "redis://127.0.0.1:6379",
@@ -83,10 +97,8 @@ export const env = {
     process.env.REDIS_FOOTBALL_CATALOG_STREAM_KEY?.trim() ??
     `${redisKeyPrefix}:events:catalog`,
 
-  // NBA — desligado por padrão, ligado via NBA_ENABLED=true + NBA_SERIES_IDS=<ids>
-  nbaEnabled: parseBooleanOrDefault(process.env.NBA_ENABLED, true),
-
-  nbaSeriesIds: parseCsv(process.env.NBA_SERIES_IDS),
+  nbaEnabled,
+  nbaSeriesIds,
 
   redisNbaQuoteEligibleKey:
     process.env.REDIS_NBA_QUOTE_ELIGIBLE_KEY?.trim() ??
