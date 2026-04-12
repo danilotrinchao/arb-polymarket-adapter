@@ -36,16 +36,60 @@ const parseCsv = (value: string | undefined): string[] => {
     .filter((item) => item.length > 0);
 };
 
+const requireNonEmpty = (
+  value: string | undefined,
+  variableName: string
+): string => {
+  const normalized = value?.trim();
+
+  if (!normalized) {
+    throw new Error(
+      `[env] Required environment variable missing: ${variableName}`
+    );
+  }
+
+  return normalized;
+};
+
+const isRailwayRuntime =
+  !!process.env.RAILWAY_ENVIRONMENT ||
+  !!process.env.RAILWAY_PROJECT_ID ||
+  !!process.env.RAILWAY_SERVICE_ID;
+
+const nodeEnv = process.env.NODE_ENV?.trim().toLowerCase() ?? "development";
+const isProductionLike = nodeEnv === "production" || isRailwayRuntime;
+
 const redisKeyPrefix =
   process.env.REDIS_KEY_PREFIX?.trim() && process.env.REDIS_KEY_PREFIX.trim().length > 0
     ? process.env.REDIS_KEY_PREFIX.trim()
     : "pm";
+
+const rawRedisEnabled = process.env.REDIS_ENABLED;
+const redisEnabled = parseBooleanOrDefault(rawRedisEnabled, true);
+
+const rawRedisUrl = process.env.REDIS_URL?.trim();
+const redisUrl =
+  redisEnabled && isProductionLike
+    ? requireNonEmpty(process.env.REDIS_URL, "REDIS_URL")
+    : rawRedisUrl && rawRedisUrl.length > 0
+      ? rawRedisUrl
+      : "redis://127.0.0.1:6379";
 
 const rawNbaEnabled = process.env.NBA_ENABLED;
 const rawNbaSeriesIds = process.env.NBA_SERIES_IDS;
 
 const nbaEnabled = parseBooleanOrDefault(rawNbaEnabled, false);
 const nbaSeriesIds = parseCsv(rawNbaSeriesIds);
+
+console.log("[env] NODE_ENV=", nodeEnv);
+console.log("[env] isRailwayRuntime=", isRailwayRuntime);
+console.log("[env] REDIS_ENABLED(raw)=", rawRedisEnabled ?? "undefined");
+console.log("[env] REDIS_URL(raw)=", rawRedisUrl ? "[present]" : "undefined");
+console.log("[env] redisEnabled(parsed)=", redisEnabled);
+console.log(
+  "[env] redisUrl(resolved)=",
+  redisUrl.includes("127.0.0.1") ? redisUrl : "[non-local-configured]"
+);
 
 console.log("[env] NBA_ENABLED(raw)=", rawNbaEnabled ?? "undefined");
 console.log("[env] NBA_SERIES_IDS(raw)=", rawNbaSeriesIds ?? "undefined");
@@ -90,8 +134,8 @@ export const env = {
       ? parseCsv(process.env.POLY_COMPETITION_SERIES_IDS)
       : ["10359", "36", "10003", "10193", "10194", "10203", "10195"],
 
-  redisEnabled: parseBooleanOrDefault(process.env.REDIS_ENABLED, true),
-  redisUrl: process.env.REDIS_URL?.trim() ?? "redis://127.0.0.1:6379",
+  redisEnabled,
+  redisUrl,
   redisKeyPrefix,
 
   redisFootballQuoteEligibleKey:
